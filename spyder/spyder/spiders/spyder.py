@@ -33,8 +33,6 @@ class Spyder(scrapy.Spider):
             print(dict(id=id_xpath, price=price_xpath, area=area_xpath))
 
     def desmascarar_moeda(self, valor):
-        # return Decimal(valor.replace('R$', '').replace('.', '').replace(',',
-        #         '.'))
         return Decimal(float(valor.replace('R$', '').replace('.', '').replace(
             ',', '.')))
 
