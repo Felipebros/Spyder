@@ -9,6 +9,7 @@ class Spyder(scrapy.Spider):
         'https://www.imoveismartinelli.com.br/pesquisa-de-imoveis/?locacao_ve'\
         'nda=V&finalidade=0&dormitorio=0&garagem=0&vmi=&vma='
     ]
+    site = 'https://www.imoveismartinelli.com.br/'
 
     def parse(self, response):
         imoveis = response.xpath('//div[@id = "property-listing"]//div[@class'\
@@ -32,9 +33,25 @@ class Spyder(scrapy.Spider):
                     'ta_desc"]//strong/text()').get(),
             }
 
+        proxima_pagina = response.xpath('//div[re:test(@class, "paginatio'\
+            'n")]//ul//li[last()]//a/@href').get()
+        if proxima_pagina != 'JavaScript:void(0)':
+            proxima_pagina = self.site + proxima_pagina
+            yield scrapy.Request(proxima_pagina, callback=self.parse)
+
+
     def desmascarar_moeda(self, valor):
-        return Decimal(float(valor.replace('R$', '').replace('.', '').replace(
-            ',', '.')))
+        try:
+            valor = Decimal(float(valor.replace('R$', '').replace('.', '')
+                .replace(',', '.')))
+        except:
+            return None
+        return valor
 
     def desmascarar_area(self, valor):
-        return Decimal(float(valor.replace(' m', '').replace(' ', '')))
+        try:
+            valor =  Decimal(float(valor.replace(' m', '')
+                .replace(' ', '')))
+        except:
+            return None
+        return valor
